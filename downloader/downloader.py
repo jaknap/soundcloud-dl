@@ -1,6 +1,6 @@
-import soundcloud, requests, os, re, sys
+import requests, os, re, sys
 import socket, json
-from soundcloud import resource
+
 from .utils import download_file, tag_file, sanitize, get_filename, create_directory
 from .context import client_id
 from requests.adapters import HTTPAdapter
@@ -35,8 +35,11 @@ class SoundcloudDownloader(object):
             if "stream_url" in track:
                 return (track["stream_url"], "mp3")
             for transcoding in track["media"]["transcodings"]:
+                print("json", str(transcoding))
+
                 if transcoding["format"]["protocol"] == "progressive":
                     r = self.session.get(transcoding["url"])
+                    print("json", json.loads(r.text))
                     return (json.loads(r.text)["url"] , "mp3")
         return (None, None)
 
@@ -72,7 +75,7 @@ class SoundcloudDownloader(object):
 
     def download_tracks(self, tracks):
         for _, track in filter(lambda x: self.check_track_number(x[0]), enumerate(tracks)):
-            self.download_track(track)
+            return None
 
     def check_track_number(self, index):
         if self.download_count == self.args.limit:
@@ -201,6 +204,8 @@ class SoundcloudDownloader(object):
                     print("Single track found")
                     print("Saving in: " + os.getcwd())
                     tracks = data
+                    self.download_track(tracks)
+
                     if self.args.similar:
                         tracks = self.get_recommended_tracks(data)
             elif data['kind'] == "playlist":

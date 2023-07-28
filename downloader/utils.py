@@ -1,4 +1,4 @@
-import soundcloud, requests, os, re, sys
+import requests, os, re, sys
 import socket, json
 
 from tqdm import tqdm
